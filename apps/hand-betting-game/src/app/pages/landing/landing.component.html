@@ -1,5 +1,60 @@
-<div class="landing-page">
-  <h1>Hand Betting Game</h1>
-  <p>Bet on Mahjong tile hands!</p>
-  <a routerLink="/game" class="btn-new-game">New Game</a>
+<div class="landing">
+
+  <!-- Hero -->
+  <header class="landing__hero">
+    <div class="landing__tiles-deco" aria-hidden="true">
+      <span class="deco-tile">🀇</span>
+      <span class="deco-tile deco-tile--float">🀄</span>
+      <span class="deco-tile">🀅</span>
+      <span class="deco-tile deco-tile--float">🀆</span>
+      <span class="deco-tile">🀙</span>
+    </div>
+
+    <div class="landing__brand">
+      <h1 class="landing__title">
+        <span class="landing__title-main">Hand Betting</span>
+        <span class="landing__title-sub">Mahjong Edition</span>
+      </h1>
+      <p class="landing__tagline">
+        Read the tiles. Feel the odds. Bet wisely.
+      </p>
+    </div>
+
+    <a routerLink="/game" class="btn btn-primary landing__cta">
+      New Game
+    </a>
+  </header>
+
+  <!-- Leaderboard -->
+  <section class="landing__leaderboard">
+    <h2 class="landing__section-title">Top Scores</h2>
+
+    @if (loading$ | async) {
+      <div class="leaderboard-state">Loading…</div>
+    } @else if (error$ | async) {
+      <div class="leaderboard-state leaderboard-state--error">
+        Could not load scores
+      </div>
+    } @else if ((entries$ | async)?.length === 0) {
+      <div class="leaderboard-state">
+        No scores yet — be the first!
+      </div>
+    } @else {
+      <ol class="leaderboard">
+        @for (entry of entries$ | async; track entry._id; let i = $index) {
+          <li class="leaderboard__entry" [class.leaderboard__entry--top]="i === 0">
+            <span class="leaderboard__rank">
+              @if (i === 0) { 🥇 }
+              @else if (i === 1) { 🥈 }
+              @else if (i === 2) { 🥉 }
+              @else { {{ i + 1 }} }
+            </span>
+            <span class="leaderboard__name">{{ entry.playerName }}</span>
+            <span class="leaderboard__score">{{ entry.score | number }}</span>
+          </li>
+        }
+      </ol>
+    }
+  </section>
+
 </div>
