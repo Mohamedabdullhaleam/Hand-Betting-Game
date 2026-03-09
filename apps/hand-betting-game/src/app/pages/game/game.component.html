@@ -1,5 +1,14 @@
 <div class="game">
 
+  <!-- Bet result overlay -->
+  @if (showResult) {
+    <div class="game__result-overlay" [class.game__result-overlay--win]="resultWon" [class.game__result-overlay--loss]="!resultWon">
+      <span class="game__result-icon">{{ resultWon ? '✓' : '✗' }}</span>
+      <span class="game__result-delta">{{ resultDelta > 0 ? '+' : '' }}{{ resultDelta | number }}</span>
+      <span class="game__result-label">{{ resultWon ? 'WIN' : 'LOSS' }}</span>
+    </div>
+  }
+
   <!-- Header -->
   <header class="game__header">
     <a routerLink="/" class="btn btn-ghost game__exit">← Exit</a>

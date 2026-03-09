@@ -52,3 +52,13 @@ export const selectDrawPileExhaustionCount = createSelector(
   selectGameState,
   (state) => state.drawPileExhaustionCount
 );
+
+export const selectLastBetResult = createSelector(
+  selectGameState,
+  (state) => state.lastBetResult
+);
+
+export const selectLastScoreDelta = createSelector(
+  selectGameState,
+  (state) => state.lastScoreDelta
+);

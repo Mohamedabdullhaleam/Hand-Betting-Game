@@ -1,5 +1,6 @@
-import { Hand } from '@hand-betting-game/shared-types';
-import { Tile } from '@hand-betting-game/shared-types';
+import { Hand, Tile } from '@hand-betting-game/shared-types';
+
+export type BetResult = 'win' | 'loss' | null;
 
 export interface GameStateModel {
   drawPile: Tile[];
@@ -7,6 +8,8 @@ export interface GameStateModel {
   currentHand: Hand | null;
   previousHand: Hand | null;
   score: number;
+  lastScoreDelta: number;
+  lastBetResult: BetResult;
   tileValues: Record<string, number>;
   drawPileExhaustionCount: number;
   isGameOver: boolean;
@@ -20,6 +23,8 @@ export const initialGameState: GameStateModel = {
   currentHand: null,
   previousHand: null,
   score: 0,
+  lastScoreDelta: 0,
+  lastBetResult: null,
   tileValues: {},
   drawPileExhaustionCount: 0,
   isGameOver: false,

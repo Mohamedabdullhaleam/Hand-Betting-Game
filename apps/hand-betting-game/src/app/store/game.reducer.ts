@@ -139,6 +139,8 @@ export const gameReducer = createReducer(
       return {
         ...state,
         score: newScore,
+        lastScoreDelta: scoreChange,
+        lastBetResult: won ? 'win' : 'loss',
         tileValues: updatedTileValues,
         isGameOver: true,
         gameOverReason: tileValueReason,
@@ -160,6 +162,8 @@ export const gameReducer = createReducer(
         return {
           ...state,
           score: newScore,
+          lastScoreDelta: scoreChange,
+          lastBetResult: won ? 'win' : 'loss',
           tileValues: updatedTileValues,
           drawPileExhaustionCount: exhaustionCount,
           isGameOver: true,
@@ -180,6 +184,8 @@ export const gameReducer = createReducer(
       previousHand: state.currentHand,
       currentHand: hand,
       score: newScore,
+      lastScoreDelta: scoreChange,
+      lastBetResult: won ? 'win' : 'loss',
       tileValues: updatedTileValues,
       drawPileExhaustionCount: exhaustionCount,
       roundNumber: state.roundNumber + 1,

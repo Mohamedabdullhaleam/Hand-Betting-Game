@@ -12,6 +12,8 @@ import {
   selectIsGameOver,
   selectRoundNumber,
   selectDrawPileExhaustionCount,
+  selectLastBetResult,
+  selectLastScoreDelta,
 } from '../../store/game.selectors';
 import { TileComponent } from '../../components/tile/tile.component';
 
@@ -25,22 +27,40 @@ export class GameComponent implements OnInit {
   private store = inject(Store);
   private router = inject(Router);
 
-  currentHand$  = this.store.select(selectCurrentHand);
-  previousHand$ = this.store.select(selectPreviousHand);
-  score$        = this.store.select(selectScore);
-  drawCount$    = this.store.select(selectDrawPileCount);
-  discardCount$ = this.store.select(selectDiscardPileCount);
-  isGameOver$   = this.store.select(selectIsGameOver);
-  round$        = this.store.select(selectRoundNumber);
-  exhaustion$   = this.store.select(selectDrawPileExhaustionCount);
+  currentHand$   = this.store.select(selectCurrentHand);
+  previousHand$  = this.store.select(selectPreviousHand);
+  score$         = this.store.select(selectScore);
+  drawCount$     = this.store.select(selectDrawPileCount);
+  discardCount$  = this.store.select(selectDiscardPileCount);
+  isGameOver$    = this.store.select(selectIsGameOver);
+  round$         = this.store.select(selectRoundNumber);
+  exhaustion$    = this.store.select(selectDrawPileExhaustionCount);
+  lastBetResult$ = this.store.select(selectLastBetResult);
+  lastScoreDelta$ = this.store.select(selectLastScoreDelta);
+
+  /** Controls visibility of the result overlay */
+  showResult = false;
+  resultWon = false;
+  resultDelta = 0;
+  private resultTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     this.store.dispatch(GameActions.startGame());
 
-    // Navigate to game-over when state changes
     this.isGameOver$.subscribe((over) => {
       if (over) this.router.navigate(['/game-over']);
     });
+
+    // Flash overlay whenever a bet resolves
+    this.lastBetResult$.subscribe((result) => {
+      if (!result) return;
+      this.resultWon = result === 'win';
+      this.showResult = true;
+      if (this.resultTimer) clearTimeout(this.resultTimer);
+      this.resultTimer = setTimeout(() => (this.showResult = false), 1200);
+    });
+
+    this.lastScoreDelta$.subscribe((delta) => (this.resultDelta = delta));
   }
 
   betHigher(): void {
