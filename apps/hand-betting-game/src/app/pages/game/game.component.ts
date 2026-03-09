@@ -1,7 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { GameActions } from '../../store/game.actions';
 import {
   selectCurrentHand,
@@ -23,44 +24,64 @@ import { TileComponent } from '../../components/tile/tile.component';
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private router = inject(Router);
+  private subs = new Subscription();
 
-  currentHand$   = this.store.select(selectCurrentHand);
-  previousHand$  = this.store.select(selectPreviousHand);
-  score$         = this.store.select(selectScore);
-  drawCount$     = this.store.select(selectDrawPileCount);
-  discardCount$  = this.store.select(selectDiscardPileCount);
-  isGameOver$    = this.store.select(selectIsGameOver);
-  round$         = this.store.select(selectRoundNumber);
-  exhaustion$    = this.store.select(selectDrawPileExhaustionCount);
-  lastBetResult$ = this.store.select(selectLastBetResult);
+  currentHand$    = this.store.select(selectCurrentHand);
+  previousHand$   = this.store.select(selectPreviousHand);
+  score$          = this.store.select(selectScore);
+  drawCount$      = this.store.select(selectDrawPileCount);
+  discardCount$   = this.store.select(selectDiscardPileCount);
+  isGameOver$     = this.store.select(selectIsGameOver);
+  round$          = this.store.select(selectRoundNumber);
+  exhaustion$     = this.store.select(selectDrawPileExhaustionCount);
+  lastBetResult$  = this.store.select(selectLastBetResult);
   lastScoreDelta$ = this.store.select(selectLastScoreDelta);
 
-  /** Controls visibility of the result overlay */
   showResult = false;
-  resultWon = false;
+  resultWon  = false;
   resultDelta = 0;
   private resultTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     this.store.dispatch(GameActions.startGame());
 
-    this.isGameOver$.subscribe((over) => {
-      if (over) this.router.navigate(['/game-over']);
-    });
+    this.subs.add(
+      this.isGameOver$.subscribe((over) => {
+        if (over) this.router.navigate(['/game-over']);
+      })
+    );
 
-    // Flash overlay whenever a bet resolves
-    this.lastBetResult$.subscribe((result) => {
-      if (!result) return;
-      this.resultWon = result === 'win';
-      this.showResult = true;
-      if (this.resultTimer) clearTimeout(this.resultTimer);
-      this.resultTimer = setTimeout(() => (this.showResult = false), 1200);
-    });
+    this.subs.add(
+      this.lastBetResult$.subscribe((result) => {
+        if (!result) return;
+        this.resultWon = result === 'win';
+        this.showResult = true;
+        if (this.resultTimer) clearTimeout(this.resultTimer);
+        this.resultTimer = setTimeout(() => (this.showResult = false), 1200);
+      })
+    );
 
-    this.lastScoreDelta$.subscribe((delta) => (this.resultDelta = delta));
+    this.subs.add(
+      this.lastScoreDelta$.subscribe((delta) => (this.resultDelta = delta))
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+    if (this.resultTimer) clearTimeout(this.resultTimer);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.repeat) return;
+    const tag = (event.target as HTMLElement).tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    if (event.key === 'h' || event.key === 'H') this.betHigher();
+    if (event.key === 'l' || event.key === 'L') this.betLower();
   }
 
   betHigher(): void {

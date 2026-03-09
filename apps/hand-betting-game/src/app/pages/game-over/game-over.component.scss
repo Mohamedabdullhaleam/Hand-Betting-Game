@@ -122,6 +122,14 @@
   .btn { flex: 1; justify-content: center; }
 }
 
+/* ─── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .game-over__card  { padding: 2rem 1.5rem; }
+  .game-over__title { font-size: 1.8rem; }
+  .game-over__score-value { font-size: 3rem; }
+  .game-over__actions { flex-direction: column; }
+}
+
 /* ─── Animations ────────────────────────────────────────────────────── */
 @keyframes cardIn {
   from { opacity: 0; transform: scale(0.85) translateY(24px); }

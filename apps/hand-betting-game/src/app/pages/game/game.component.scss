@@ -194,6 +194,18 @@
   line-height: 1;
 }
 
+.btn-bet__key {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  opacity: 0.55;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 0 4px;
+  line-height: 1.6;
+  margin-top: 2px;
+}
+
 .btn-bet--higher {
   background: rgba(39, 174, 96, 0.15);
   color: #2ecc71;
@@ -218,6 +230,23 @@
     box-shadow: 0 0 20px rgba(192, 57, 43, 0.3);
     transform: translateY(-3px);
   }
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .game__header { padding: 0.75rem 1rem; gap: 0.5rem; }
+  .game__stats  { gap: 0.75rem; }
+  .game__main   { gap: 1.75rem; padding: 1.5rem 1rem 2rem; }
+
+  .btn-bet {
+    width: 110px;
+    font-size: 1rem;
+    padding: 0.85rem 0.4rem;
+  }
+
+  .btn-bet__key { display: none; }
+
+  .game__total-value { font-size: 2.2rem; }
 }
 
 /* ─── Bet result overlay ────────────────────────────────────────────── */
