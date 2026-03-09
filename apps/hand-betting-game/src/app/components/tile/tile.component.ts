@@ -23,7 +23,11 @@ const WIND_SYMBOLS: Record<WindTile, string> = {
 @Component({
   selector: 'app-tile',
   template: `
-    <div class="tile" [class.tile--small]="small" [class.tile--number]="isNumber" [attr.data-suit]="suit">
+    <div class="tile"
+         [class.tile--small]="small"
+         [class.tile--number]="isNumber"
+         [class.tile--danger]="isDanger"
+         [attr.data-suit]="suit">
       <span class="tile__symbol">{{ symbol }}</span>
       <span class="tile__value">{{ tile.value }}</span>
     </div>
@@ -34,14 +38,17 @@ export class TileComponent implements OnChanges {
   @Input({ required: true }) tile!: Tile;
   @Input() small = false;
 
-  symbol = '';
+  symbol   = '';
   isNumber = false;
-  suit = '';
+  isDanger = false;
+  suit     = '';
 
   ngOnChanges(): void {
     this.isNumber = this.tile.type === TileType.NUMBER;
-    this.suit = this.tile.suit ?? this.tile.type;
-    this.symbol = this.resolveSymbol();
+    this.suit     = this.tile.suit ?? this.tile.type;
+    this.symbol   = this.resolveSymbol();
+    // Danger: non-number tile is 1 step from game-over (value 0 or 10 ends game)
+    this.isDanger = !this.isNumber && (this.tile.value <= 1 || this.tile.value >= 9);
   }
 
   private resolveSymbol(): string {

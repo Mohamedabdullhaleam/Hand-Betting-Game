@@ -43,6 +43,18 @@
   line-height: 1.4;
 }
 
+// Danger: non-number tile value approaching 0 or 10
+.tile--danger {
+  border-color: rgba(231, 76, 60, 0.8);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35), 0 0 12px rgba(231,76,60,0.45), inset 0 1px 0 rgba(255,255,255,0.6);
+  animation: dealIn 0.3s ease both, dangerPulse 1.4s ease-in-out infinite;
+
+  .tile__value {
+    background: rgba(231,76,60,0.15);
+    color: #e74c3c;
+  }
+}
+
 // Small variant for history view
 .tile--small {
   width: 44px;
@@ -55,6 +67,11 @@
   .tile__value  { font-size: 0.6rem; padding: 1px 3px; }
 
   &:hover { transform: none; }
+}
+
+@keyframes dangerPulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,0.35), 0 0 10px rgba(231,76,60,0.4), inset 0 1px 0 rgba(255,255,255,0.6); }
+  50%       { box-shadow: 0 4px 12px rgba(0,0,0,0.35), 0 0 22px rgba(231,76,60,0.7), inset 0 1px 0 rgba(255,255,255,0.6); }
 }
 
 @keyframes dealIn {
