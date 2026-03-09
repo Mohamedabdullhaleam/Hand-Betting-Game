@@ -1,0 +1,8 @@
+{
+  "name": "@org/hand-betting-game-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "hand-betting-game-e2e"
+  }
+}
