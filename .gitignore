@@ -11,6 +11,11 @@ node_modules
 # IDEs and editors
 /.idea
 .project
+
+# AI / editor tooling (local, do not share)
+.cursor
+.claude
+.cursorrules
 .classpath
 .c9/
 *.launch
@@ -40,7 +45,6 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
-.cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
 .angular
