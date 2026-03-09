@@ -9,13 +9,14 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { appRoutes } from './app.routes';
+import { gameReducer } from './store';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
     provideHttpClient(),
-    provideStore(),
+    provideStore({ game: gameReducer }),
     provideEffects(),
     provideStoreDevtools({ logOnly: !isDevMode() }),
   ],

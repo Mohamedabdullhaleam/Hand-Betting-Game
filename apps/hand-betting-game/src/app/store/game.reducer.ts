@@ -1,0 +1,196 @@
+import { createReducer, on } from '@ngrx/store';
+import { GameActions } from './game.actions';
+import { GameStateModel, initialGameState } from './game.state';
+import {
+  createFullDeck,
+  getInitialTileValues,
+  shuffle,
+  drawHand,
+  resolveBet,
+  updateTileValuesAfterBet,
+  checkGameOverFromTileValues,
+  checkGameOverFromExhaustion,
+  reshuffleDeck,
+  updateTilesWithCurrentValues,
+} from '@hand-betting-game/game-engine';
+
+const HAND_SIZE = 5;
+
+export const gameReducer = createReducer(
+  initialGameState,
+
+  on(GameActions.startGame, (): GameStateModel => {
+    const tileValues = getInitialTileValues();
+    const deck = createFullDeck(tileValues);
+    const shuffledDeck = shuffle(deck);
+    const { hand, remainingPile } = drawHand(shuffledDeck, HAND_SIZE);
+
+    return {
+      ...initialGameState,
+      tileValues,
+      drawPile: remainingPile,
+      discardPile: [],
+      currentHand: hand,
+      previousHand: null,
+      roundNumber: 1,
+    };
+  }),
+
+  on(GameActions.drawHand, (state): GameStateModel => {
+    if (state.isGameOver || !state.currentHand) return state;
+
+    let drawPile = [...state.drawPile];
+    let discardPile = [
+      ...state.discardPile,
+      ...state.currentHand.tiles,
+    ];
+    let exhaustionCount = state.drawPileExhaustionCount;
+
+    // Check if we need to reshuffle
+    if (drawPile.length < HAND_SIZE) {
+      exhaustionCount++;
+
+      const exhaustionReason = checkGameOverFromExhaustion(exhaustionCount);
+      if (exhaustionReason) {
+        return {
+          ...state,
+          drawPileExhaustionCount: exhaustionCount,
+          isGameOver: true,
+          gameOverReason: exhaustionReason,
+        };
+      }
+
+      drawPile = reshuffleDeck(discardPile, state.tileValues);
+      discardPile = [];
+    }
+
+    // Update tile values in the draw pile
+    drawPile = updateTilesWithCurrentValues(drawPile, state.tileValues);
+
+    const { hand, remainingPile } = drawHand(drawPile, HAND_SIZE);
+
+    return {
+      ...state,
+      drawPile: remainingPile,
+      discardPile,
+      previousHand: state.currentHand,
+      currentHand: hand,
+      drawPileExhaustionCount: exhaustionCount,
+      roundNumber: state.roundNumber + 1,
+    };
+  }),
+
+  on(GameActions.placeBet, (state, { direction }): GameStateModel => {
+    if (state.isGameOver || !state.currentHand) return state;
+
+    // If no previous hand, this is the first round — just draw next
+    if (!state.previousHand) {
+      let drawPile = [...state.drawPile];
+      let discardPile = [
+        ...state.discardPile,
+        ...state.currentHand.tiles,
+      ];
+      let exhaustionCount = state.drawPileExhaustionCount;
+
+      if (drawPile.length < HAND_SIZE) {
+        exhaustionCount++;
+        const exhaustionReason = checkGameOverFromExhaustion(exhaustionCount);
+        if (exhaustionReason) {
+          return {
+            ...state,
+            drawPileExhaustionCount: exhaustionCount,
+            isGameOver: true,
+            gameOverReason: exhaustionReason,
+          };
+        }
+        drawPile = reshuffleDeck(discardPile, state.tileValues);
+        discardPile = [];
+      }
+
+      drawPile = updateTilesWithCurrentValues(drawPile, state.tileValues);
+      const { hand, remainingPile } = drawHand(drawPile, HAND_SIZE);
+
+      return {
+        ...state,
+        drawPile: remainingPile,
+        discardPile,
+        previousHand: state.currentHand,
+        currentHand: hand,
+        drawPileExhaustionCount: exhaustionCount,
+        roundNumber: state.roundNumber + 1,
+      };
+    }
+
+    // Resolve the bet
+    const won = resolveBet(state.previousHand, state.currentHand, direction);
+    const scoreChange = won ? state.currentHand.totalValue : -state.currentHand.totalValue;
+    const newScore = state.score + scoreChange;
+
+    // Update non-number tile values based on win/loss
+    const updatedTileValues = updateTileValuesAfterBet(
+      state.tileValues,
+      state.currentHand,
+      won
+    );
+
+    // Check game over from tile values
+    const tileValueReason = checkGameOverFromTileValues(updatedTileValues);
+    if (tileValueReason) {
+      return {
+        ...state,
+        score: newScore,
+        tileValues: updatedTileValues,
+        isGameOver: true,
+        gameOverReason: tileValueReason,
+      };
+    }
+
+    // Draw next hand
+    let drawPile = [...state.drawPile];
+    let discardPile = [
+      ...state.discardPile,
+      ...state.currentHand.tiles,
+    ];
+    let exhaustionCount = state.drawPileExhaustionCount;
+
+    if (drawPile.length < HAND_SIZE) {
+      exhaustionCount++;
+      const exhaustionReason = checkGameOverFromExhaustion(exhaustionCount);
+      if (exhaustionReason) {
+        return {
+          ...state,
+          score: newScore,
+          tileValues: updatedTileValues,
+          drawPileExhaustionCount: exhaustionCount,
+          isGameOver: true,
+          gameOverReason: exhaustionReason,
+        };
+      }
+      drawPile = reshuffleDeck(discardPile, updatedTileValues);
+      discardPile = [];
+    }
+
+    drawPile = updateTilesWithCurrentValues(drawPile, updatedTileValues);
+    const { hand, remainingPile } = drawHand(drawPile, HAND_SIZE);
+
+    return {
+      ...state,
+      drawPile: remainingPile,
+      discardPile,
+      previousHand: state.currentHand,
+      currentHand: hand,
+      score: newScore,
+      tileValues: updatedTileValues,
+      drawPileExhaustionCount: exhaustionCount,
+      roundNumber: state.roundNumber + 1,
+    };
+  }),
+
+  on(GameActions.gameOver, (state, { reason }): GameStateModel => ({
+    ...state,
+    isGameOver: true,
+    gameOverReason: reason,
+  })),
+
+  on(GameActions.resetGame, (): GameStateModel => initialGameState)
+);

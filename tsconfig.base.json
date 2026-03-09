@@ -16,6 +16,11 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@org/source"]
+    "customConditions": ["@org/source"],
+    "baseUrl": ".",
+    "paths": {
+      "@hand-betting-game/shared-types": ["libs/shared-types/src/index.ts"],
+      "@hand-betting-game/game-engine": ["libs/game-engine/src/index.ts"]
+    }
   }
 }
