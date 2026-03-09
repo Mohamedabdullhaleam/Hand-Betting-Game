@@ -1,4 +1,55 @@
-<div class="game-over-page">
-  <h1>Game Over</h1>
-  <a routerLink="/" class="btn-home">Back to Home</a>
+<div class="game-over">
+
+  <div class="game-over__card">
+
+    <div class="game-over__icon">🀄</div>
+    <h1 class="game-over__title">Game Over</h1>
+
+    @if (reason$ | async; as reason) {
+      <p class="game-over__reason">{{ reason }}</p>
+    }
+
+    <div class="game-over__score">
+      <span class="game-over__score-label">Final Score</span>
+      <span class="game-over__score-value">{{ score$ | async | number }}</span>
+    </div>
+
+    <!-- Save to leaderboard -->
+    @if (!submitted) {
+      <div class="game-over__save">
+        <p class="game-over__save-label">Save your score?</p>
+        <div class="game-over__save-row">
+          <input
+            class="game-over__input"
+            type="text"
+            placeholder="Your name"
+            maxlength="20"
+            [(ngModel)]="playerName"
+            (keyup.enter)="submitScore()"
+          />
+          <button
+            class="btn btn-primary"
+            [disabled]="!playerName.trim()"
+            (click)="submitScore()"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    } @else {
+      <p class="game-over__saved">Score saved! ✓</p>
+    }
+
+    <!-- Actions -->
+    <div class="game-over__actions">
+      <a routerLink="/game" class="btn btn-primary" (click)="playAgain()">
+        Play Again
+      </a>
+      <a routerLink="/" class="btn btn-secondary">
+        Home
+      </a>
+    </div>
+
+  </div>
+
 </div>

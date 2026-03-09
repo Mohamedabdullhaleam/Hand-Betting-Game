@@ -1,0 +1,69 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 72px;
+  height: 96px;
+  background: var(--color-tile-bg);
+  border: 2px solid var(--color-tile-border);
+  border-radius: var(--radius-md);
+  padding: 0.35rem 0.25rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
+  animation: dealIn 0.3s ease both;
+  cursor: default;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+
+  // Suit colour tints
+  &[data-suit='bamboo']     { --suit-color: #1a7a3a; }
+  &[data-suit='characters'] { --suit-color: #b03030; }
+  &[data-suit='circles']    { --suit-color: #1a5fa0; }
+  &[data-suit='dragon']     { --suit-color: #a03020; }
+  &[data-suit='wind']       { --suit-color: #2060a0; }
+}
+
+.tile__symbol {
+  font-size: 2.4rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+.tile__value {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--suit-color, #333);
+  background: rgba(255,255,255,0.5);
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.4;
+}
+
+// Small variant for history view
+.tile--small {
+  width: 44px;
+  height: 58px;
+  padding: 0.2rem;
+  border-radius: var(--radius-sm);
+  animation: none;
+
+  .tile__symbol { font-size: 1.4rem; }
+  .tile__value  { font-size: 0.6rem; padding: 1px 3px; }
+
+  &:hover { transform: none; }
+}
+
+@keyframes dealIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) rotateX(30deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+}

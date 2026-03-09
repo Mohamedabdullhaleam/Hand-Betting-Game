@@ -1,7 +1,90 @@
-<div class="game-page">
-  <header>
-    <a routerLink="/" class="btn-exit">Exit</a>
-    <h2>Hand Betting Game</h2>
+<div class="game">
+
+  <!-- Header -->
+  <header class="game__header">
+    <a routerLink="/" class="btn btn-ghost game__exit">← Exit</a>
+
+    <div class="game__stats">
+      <div class="stat">
+        <span class="stat__label">Round</span>
+        <span class="stat__value">{{ round$ | async }}</span>
+      </div>
+      <div class="stat stat--score">
+        <span class="stat__label">Score</span>
+        <span class="stat__value">{{ score$ | async | number }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat__label">Draw pile</span>
+        <span class="stat__value">{{ drawCount$ | async }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat__label">Discards</span>
+        <span class="stat__value">{{ discardCount$ | async }}</span>
+      </div>
+      <div class="stat" title="Draw pile exhaustions remaining">
+        <span class="stat__label">Resets</span>
+        <span class="stat__value">{{ 3 - ((exhaustion$ | async) ?? 0) }}/3</span>
+      </div>
+    </div>
   </header>
-  <p>Game will go here</p>
+
+  <main class="game__main">
+
+    <!-- History: previous hand -->
+    @if (previousHand$ | async; as prev) {
+      <section class="game__history">
+        <p class="game__history-label">Previous hand — {{ prev.totalValue }}</p>
+        <div class="game__tile-row game__tile-row--small">
+          @for (tile of prev.tiles; track tile.id) {
+            <app-tile [tile]="tile" [small]="true" />
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Current hand -->
+    <section class="game__hand">
+      <p class="game__hand-label">Current hand</p>
+
+      @if (currentHand$ | async; as hand) {
+        <div class="game__tile-row">
+          @for (tile of hand.tiles; track tile.id; let i = $index) {
+            <div class="game__tile-wrapper" [style.animation-delay]="i * 80 + 'ms'">
+              <app-tile [tile]="tile" />
+            </div>
+          }
+        </div>
+
+        <div class="game__total">
+          <span class="game__total-label">Total</span>
+          <span class="game__total-value">{{ hand.totalValue }}</span>
+        </div>
+      } @else {
+        <div class="game__loading">Dealing…</div>
+      }
+    </section>
+
+    <!-- Betting controls -->
+    <section class="game__bet">
+      <p class="game__bet-label">
+        @if (previousHand$ | async) {
+          Will the next hand be higher or lower?
+        } @else {
+          Place your first bet for the next hand
+        }
+      </p>
+
+      <div class="game__bet-actions">
+        <button class="btn btn-bet btn-bet--higher" (click)="betHigher()">
+          <span class="btn-bet__arrow">▲</span>
+          Higher
+        </button>
+        <button class="btn btn-bet btn-bet--lower" (click)="betLower()">
+          <span class="btn-bet__arrow">▼</span>
+          Lower
+        </button>
+      </div>
+    </section>
+
+  </main>
 </div>
