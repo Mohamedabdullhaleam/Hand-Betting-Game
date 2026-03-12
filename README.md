@@ -1,107 +1,124 @@
-# New Nx Repository
+# Hand Betting Game
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A full-stack Mahjong tile betting game built with the **MEAN stack** in an **Nx monorepo**.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+**Stack:** Angular 21 | NgRx | NestJS | MongoDB Atlas | Nx 22 | TypeScript
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-## Finish your Nx platform setup
+---
 
-🚀 [Finish setting up your workspace](https://cloud.nx.app/connect/kcCobBJ3Av) to get faster builds with remote caching, distributed task execution, and self-healing CI. [Learn more about Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud).
+## Setup & Run
 
-## Generate a library
+### Prerequisites
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+- **Node.js v20.19.0+** (LTS)
+- **npm**
+- A **MongoDB Atlas** account (free tier works) — [create one here](https://www.mongodb.com/cloud/atlas)
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone <repo-url>
+cd hand-betting-game
+
+# 2. Install dependencies
+npm install
+
+# 3. Create the API environment file
+#    Replace the URI with your MongoDB Atlas connection string
+echo "MONGODB_URI=mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/<db>" > apps/api/.env
 ```
 
-## Run tasks
+### Running
 
-To build the library use:
+Open **two terminals**:
 
-```sh
-npx nx build pkg1
+```bash
+# Terminal 1 — Angular frontend (http://localhost:4200)
+npx nx serve hand-betting-game
+
+# Terminal 2 — NestJS API (http://localhost:3000)
+npx nx serve api
 ```
 
-To run any task with Nx use:
+### Building for Production
 
-```sh
-npx nx <target> <project-name>
+```bash
+npx nx build hand-betting-game
+npx nx build api
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+---
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+## Project Structure
 
 ```
-npx nx release
+hand-betting-game/
+├── apps/
+│   ├── hand-betting-game/     # Angular 21 frontend (NgRx state management)
+│   └── api/                   # NestJS backend (REST API + MongoDB)
+├── libs/
+│   ├── shared-types/          # Shared TypeScript interfaces & enums
+│   └── game-engine/           # Pure game logic functions (framework-agnostic)
+├── DOCUMENTATION.md           # Full technical documentation
+└── README.md
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+### Key Architecture Decisions
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **Nx Monorepo** — Frontend and backend share types via `libs/shared-types`, no code duplication
+- **Pure Game Engine** — All game rules live in `libs/game-engine` as pure functions with zero framework imports, making them easy to test and reuse
+- **NgRx** — Single source of truth for game state; deterministic reducer handles the entire game loop; Effects handle async API calls
+- **Lazy-loaded routes** — Each page is loaded on demand for fast initial load
 
-## Keep TypeScript project references up to date
+---
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+## Game Overview
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+The player is dealt a hand of 5 Mahjong tiles and bets whether the **next** hand will have a **higher** or **lower** total value.
 
-```sh
-npx nx sync
-```
+- **136 tiles** — Bamboo, Characters, Circles (face value 1-9), Dragons, and Winds
+- **Dynamic values** — Dragon/Wind tiles start at 5 and shift +1/-1 based on wins/losses
+- **Game over** when any tile value hits 0 or 10, or the draw pile is exhausted 3 times
+- **Leaderboard** — Top scores saved to MongoDB Atlas via NestJS API
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+### Controls
 
-```sh
-npx nx sync:check
-```
+- Click **Higher** / **Lower** buttons, or press **H** / **L** on keyboard
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+---
 
-## Nx Cloud
+## Handwritten vs. AI-Assisted
 
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+### What was handwritten
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **Architecture planning** — Technology choices (MEAN stack, Nx monorepo, NgRx for state), project structure decisions, and the patch-by-patch build strategy were planned and directed by the developer
+- **Game design decisions** — How the game loop works, scoring rules, tile value scaling, game-over conditions, and UX flow were all developer-directed based on the assessment requirements
+- **Code review & validation** — Every piece of generated code was reviewed, tested, and corrected by the developer. Bugs were caught and fixes were directed manually
+- **MongoDB Atlas setup** — Database cluster creation, connection configuration, and environment setup were done manually
 
-### Set up CI (non-Github Actions CI)
+### Where AI was utilized
 
-**Note:** This is only required if your CI provider is not GitHub Actions.
+- **Code generation** — AI (Claude) was used as a coding assistant to generate boilerplate and implementation code across all layers: Angular components/templates/SCSS, NgRx store (actions, reducer, selectors, effects), NestJS modules (controller, service, schema), and the game engine's pure logic functions
+- **Scaffolding** — Nx workspace setup commands, library generation, and project configuration were guided by AI
+- **Styling** — CSS design tokens, component styles, animations (tile deal-in, win/loss overlay, danger pulse), and responsive breakpoints were AI-generated
+- **Documentation** — The full technical documentation (`DOCUMENTATION.md`) was AI-generated based on the actual codebase
+- **Bug fixing** — AI assisted in identifying and fixing build errors (TypeScript config issues, Angular compatibility, Node.js version requirements) and logic bugs (bet resolution timing, duplicate tile value scaling)
 
-Use the following command to configure a CI workflow for your workspace:
+### Summary
 
-```sh
-npx nx g ci-workflow
-```
+The developer directed all architectural decisions, reviewed all code, and validated correctness against the assessment requirements. AI was used as a productivity tool to accelerate implementation across the full stack.
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Install Nx Console
+## Full Documentation
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+See [DOCUMENTATION.md](./DOCUMENTATION.md) for comprehensive technical documentation including:
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- Complete game rules and mechanics
+- NgRx state shape, actions, reducer logic, and selectors
+- Game engine API reference
+- NestJS API endpoints
+- Data flow diagrams
+- Design system tokens
+- Full build/patch history
