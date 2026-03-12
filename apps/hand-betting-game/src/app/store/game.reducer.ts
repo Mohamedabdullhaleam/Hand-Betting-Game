@@ -90,7 +90,7 @@ export const gameReducer = createReducer(
       ...state.currentHand.tiles,
     ];
     let exhaustionCount = state.drawPileExhaustionCount;
-    let tileValues = state.tileValues;
+    const tileValues = state.tileValues;
 
     if (drawPile.length < HAND_SIZE) {
       exhaustionCount++;
