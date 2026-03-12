@@ -1,77 +1,179 @@
 .tile {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  width: 72px;
-  height: 96px;
-  background: var(--color-tile-bg);
-  border: 2px solid var(--color-tile-border);
-  border-radius: var(--radius-md);
-  padding: 0.35rem 0.25rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
+  justify-content: center;
+  gap: 2px;
+  width: 80px;
+  height: 110px;
+  background: linear-gradient(170deg, #2a2f38, #1e2228);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 0.4rem 0.3rem;
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.08);
   animation: dealIn 0.3s ease both;
   cursor: default;
   transition: transform 200ms ease, box-shadow 200ms ease;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 7px;
+    pointer-events: none;
+  }
 
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6);
+    transform: translateY(-6px) scale(1.03);
+    box-shadow:
+      0 12px 28px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.1);
   }
 
-  // Suit colour tints
-  &[data-suit='bamboo']     { --suit-color: #1a7a3a; }
-  &[data-suit='characters'] { --suit-color: #b03030; }
-  &[data-suit='circles']    { --suit-color: #1a5fa0; }
-  &[data-suit='dragon']     { --suit-color: #a03020; }
-  &[data-suit='wind']       { --suit-color: #2060a0; }
+  // --- Suit colour themes ---
+  &[data-suit='bamboo'] {
+    --suit-color: #4ade80;
+    --suit-color-dim: rgba(74, 222, 128, 0.12);
+    border-color: rgba(74, 222, 128, 0.2);
+  }
+  &[data-suit='characters'] {
+    --suit-color: #f87171;
+    --suit-color-dim: rgba(248, 113, 113, 0.12);
+    border-color: rgba(248, 113, 113, 0.2);
+  }
+  &[data-suit='circles'] {
+    --suit-color: #60a5fa;
+    --suit-color-dim: rgba(96, 165, 250, 0.12);
+    border-color: rgba(96, 165, 250, 0.2);
+  }
+  &[data-suit='dragon'] {
+    --suit-color: #fbbf24;
+    --suit-color-dim: rgba(251, 191, 36, 0.1);
+    border-color: rgba(251, 191, 36, 0.2);
+  }
+  &[data-suit='wind'] {
+    --suit-color: #a78bfa;
+    --suit-color-dim: rgba(167, 139, 250, 0.1);
+    border-color: rgba(167, 139, 250, 0.2);
+  }
+
+  // Dragon-specific overrides
+  &[data-dragon='dragon-red']   { --suit-color: #f87171; border-color: rgba(248, 113, 113, 0.25); }
+  &[data-dragon='dragon-green'] { --suit-color: #4ade80; border-color: rgba(74, 222, 128, 0.25); }
+  &[data-dragon='dragon-white'] { --suit-color: #d1d5db; border-color: rgba(209, 213, 219, 0.2); }
 }
 
-.tile__symbol {
-  font-size: 2.4rem;
-  line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
-}
-
-.tile__value {
-  font-size: 0.75rem;
+// --- Top label (number or tile name) ---
+.tile__label {
+  font-size: 0.6rem;
   font-weight: 700;
-  color: var(--suit-color, #333);
-  background: rgba(255,255,255,0.5);
-  border-radius: 4px;
-  padding: 1px 5px;
-  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--suit-color, #aaa);
+  opacity: 0.65;
+  line-height: 1;
 }
 
-// Danger: non-number tile value approaching 0 or 10
+// --- Main icon ---
+.tile__icon {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--suit-color, #ddd);
+  text-shadow: 0 0 12px var(--suit-color-dim, transparent);
+  font-family: 'Noto Sans SC', 'Noto Sans TC', 'Microsoft YaHei', 'SimHei', 'Hiragino Sans', sans-serif;
+}
+
+// Number tiles: number prominent, suit icon secondary
+.tile--number {
+  .tile__label {
+    font-size: 1.2rem;
+    font-weight: 800;
+    opacity: 1;
+    color: var(--suit-color, #ddd);
+  }
+
+  .tile__icon {
+    font-size: 1.4rem;
+    opacity: 0.45;
+  }
+}
+
+// Dragon tiles: warm glow
+.tile--dragon {
+  background: linear-gradient(170deg, #302820, #1e1a14);
+
+  .tile__icon {
+    font-size: 2.6rem;
+  }
+}
+
+// Wind tiles: cool tint
+.tile--wind {
+  background: linear-gradient(170deg, #252838, #1a1d28);
+
+  .tile__icon {
+    font-size: 2.4rem;
+  }
+}
+
+// --- Value badge ---
+.tile__value-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #111;
+  background: var(--suit-color, #888);
+  border-radius: 6px;
+  padding: 1px 8px;
+  line-height: 1.5;
+  min-width: 24px;
+  text-align: center;
+}
+
+// --- Danger state ---
 .tile--danger {
-  border-color: rgba(231, 76, 60, 0.8);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35), 0 0 12px rgba(231,76,60,0.45), inset 0 1px 0 rgba(255,255,255,0.6);
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.4),
+    0 0 16px rgba(239, 68, 68, 0.3);
   animation: dealIn 0.3s ease both, dangerPulse 1.4s ease-in-out infinite;
 
-  .tile__value {
-    background: rgba(231,76,60,0.15);
-    color: #e74c3c;
+  .tile__value-badge {
+    background: #ef4444;
+    color: #fff;
   }
 }
 
-// Small variant for history view
+// --- Small variant (history view) ---
 .tile--small {
-  width: 44px;
-  height: 58px;
+  width: 52px;
+  height: 72px;
   padding: 0.2rem;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   animation: none;
+  gap: 1px;
 
-  .tile__symbol { font-size: 1.4rem; }
-  .tile__value  { font-size: 0.6rem; padding: 1px 3px; }
+  &::before { display: none; }
+
+  .tile__label { font-size: 0.5rem; }
+  .tile__icon  { font-size: 1.3rem; }
+  .tile__value-badge { font-size: 0.5rem; padding: 0 5px; }
+
+  &.tile--number .tile__label { font-size: 0.8rem; }
+  &.tile--number .tile__icon  { font-size: 0.9rem; }
 
   &:hover { transform: none; }
 }
 
+// --- Animations ---
 @keyframes dangerPulse {
-  0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,0.35), 0 0 10px rgba(231,76,60,0.4), inset 0 1px 0 rgba(255,255,255,0.6); }
-  50%       { box-shadow: 0 4px 12px rgba(0,0,0,0.35), 0 0 22px rgba(231,76,60,0.7), inset 0 1px 0 rgba(255,255,255,0.6); }
+  0%, 100% { box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 12px rgba(239,68,68,0.3); }
+  50%      { box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 26px rgba(239,68,68,0.6); }
 }
 
 @keyframes dealIn {
