@@ -139,6 +139,7 @@ export const gameReducer = createReducer(
         isGameOver: true,
         gameOverReason: tileValueReason,
         roundNumber: state.roundNumber + 1,
+        betCount: state.betCount + 1,
       };
     }
 
@@ -154,6 +155,7 @@ export const gameReducer = createReducer(
       tileValues: updatedTileValues,
       drawPileExhaustionCount: exhaustionCount,
       roundNumber: state.roundNumber + 1,
+      betCount: state.betCount + 1,
     };
   }),
 

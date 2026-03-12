@@ -1,8 +1,11 @@
 <div class="game">
 
-  <!-- Bet result overlay -->
+  <!-- Bet result overlay — resultKey forces Angular to recreate the element each bet -->
   @if (showResult) {
-    <div class="game__result-overlay" [class.game__result-overlay--win]="resultWon" [class.game__result-overlay--loss]="!resultWon">
+    <div class="game__result-overlay"
+         [class.game__result-overlay--win]="resultWon"
+         [class.game__result-overlay--loss]="!resultWon"
+         [attr.data-key]="resultKey">
       <span class="game__result-icon">{{ resultWon ? '✓' : '✗' }}</span>
       <span class="game__result-delta">{{ resultDelta > 0 ? '+' : '' }}{{ resultDelta | number }}</span>
       <span class="game__result-label">{{ resultWon ? 'WIN' : 'LOSS' }}</span>

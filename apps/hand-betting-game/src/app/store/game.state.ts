@@ -15,6 +15,7 @@ export interface GameStateModel {
   isGameOver: boolean;
   gameOverReason: string | null;
   roundNumber: number;
+  betCount: number;
 }
 
 export const initialGameState: GameStateModel = {
@@ -30,4 +31,5 @@ export const initialGameState: GameStateModel = {
   isGameOver: false,
   gameOverReason: null,
   roundNumber: 0,
+  betCount: 0,
 };

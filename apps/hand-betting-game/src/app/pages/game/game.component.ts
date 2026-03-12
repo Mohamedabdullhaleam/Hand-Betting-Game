@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -15,6 +15,7 @@ import {
   selectDrawPileExhaustionCount,
   selectLastBetResult,
   selectLastScoreDelta,
+  selectBetCount,
 } from '../../store/game.selectors';
 import { TileComponent } from '../../components/tile/tile.component';
 
@@ -27,6 +28,7 @@ import { TileComponent } from '../../components/tile/tile.component';
 export class GameComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
   private subs = new Subscription();
 
   currentHand$    = this.store.select(selectCurrentHand);
@@ -37,12 +39,11 @@ export class GameComponent implements OnInit, OnDestroy {
   isGameOver$     = this.store.select(selectIsGameOver);
   round$          = this.store.select(selectRoundNumber);
   exhaustion$     = this.store.select(selectDrawPileExhaustionCount);
-  lastBetResult$  = this.store.select(selectLastBetResult);
-  lastScoreDelta$ = this.store.select(selectLastScoreDelta);
 
-  showResult = false;
-  resultWon  = false;
+  showResult  = false;
+  resultWon   = false;
   resultDelta = 0;
+  resultKey   = 0; // changes every bet to force re-render
   private resultTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
@@ -55,17 +56,31 @@ export class GameComponent implements OnInit, OnDestroy {
     );
 
     this.subs.add(
-      this.lastBetResult$.subscribe((result) => {
-        if (!result) return;
-        this.resultWon = result === 'win';
+      this.store.select(selectBetCount).subscribe((count) => {
+        if (count === 0) return;
+        // Hide first, then show after a tick so Angular destroys & recreates the element
+        this.showResult = false;
+        this.cdr.detectChanges();
+
         this.showResult = true;
+        this.resultKey = count;
         if (this.resultTimer) clearTimeout(this.resultTimer);
-        this.resultTimer = setTimeout(() => (this.showResult = false), 1200);
+        this.resultTimer = setTimeout(() => {
+          this.showResult = false;
+          this.cdr.detectChanges();
+        }, 1500);
+        this.cdr.detectChanges();
       })
     );
 
     this.subs.add(
-      this.lastScoreDelta$.subscribe((delta) => (this.resultDelta = delta))
+      this.store.select(selectLastBetResult).subscribe((r) => {
+        if (r) this.resultWon = r === 'win';
+      })
+    );
+
+    this.subs.add(
+      this.store.select(selectLastScoreDelta).subscribe((d) => (this.resultDelta = d))
     );
   }
 
