@@ -83,77 +83,14 @@ export const gameReducer = createReducer(
   on(GameActions.placeBet, (state, { direction }): GameStateModel => {
     if (state.isGameOver || !state.currentHand) return state;
 
-    // If no previous hand, this is the first round — just draw next
-    if (!state.previousHand) {
-      let drawPile = [...state.drawPile];
-      let discardPile = [
-        ...state.discardPile,
-        ...state.currentHand.tiles,
-      ];
-      let exhaustionCount = state.drawPileExhaustionCount;
-
-      if (drawPile.length < HAND_SIZE) {
-        exhaustionCount++;
-        const exhaustionReason = checkGameOverFromExhaustion(exhaustionCount);
-        if (exhaustionReason) {
-          return {
-            ...state,
-            drawPileExhaustionCount: exhaustionCount,
-            isGameOver: true,
-            gameOverReason: exhaustionReason,
-          };
-        }
-        drawPile = reshuffleDeck(discardPile, state.tileValues);
-        discardPile = [];
-      }
-
-      drawPile = updateTilesWithCurrentValues(drawPile, state.tileValues);
-      const { hand, remainingPile } = drawHand(drawPile, HAND_SIZE);
-
-      return {
-        ...state,
-        drawPile: remainingPile,
-        discardPile,
-        previousHand: state.currentHand,
-        currentHand: hand,
-        drawPileExhaustionCount: exhaustionCount,
-        roundNumber: state.roundNumber + 1,
-      };
-    }
-
-    // Resolve the bet
-    const won = resolveBet(state.previousHand, state.currentHand, direction);
-    const scoreChange = won ? state.currentHand.totalValue : -state.currentHand.totalValue;
-    const newScore = state.score + scoreChange;
-
-    // Update non-number tile values based on win/loss
-    const updatedTileValues = updateTileValuesAfterBet(
-      state.tileValues,
-      state.currentHand,
-      won
-    );
-
-    // Check game over from tile values
-    const tileValueReason = checkGameOverFromTileValues(updatedTileValues);
-    if (tileValueReason) {
-      return {
-        ...state,
-        score: newScore,
-        lastScoreDelta: scoreChange,
-        lastBetResult: won ? 'win' : 'loss',
-        tileValues: updatedTileValues,
-        isGameOver: true,
-        gameOverReason: tileValueReason,
-      };
-    }
-
-    // Draw next hand
+    // --- 1. Draw next hand ---
     let drawPile = [...state.drawPile];
     let discardPile = [
       ...state.discardPile,
       ...state.currentHand.tiles,
     ];
     let exhaustionCount = state.drawPileExhaustionCount;
+    let tileValues = state.tileValues;
 
     if (drawPile.length < HAND_SIZE) {
       exhaustionCount++;
@@ -161,28 +98,56 @@ export const gameReducer = createReducer(
       if (exhaustionReason) {
         return {
           ...state,
-          score: newScore,
-          lastScoreDelta: scoreChange,
-          lastBetResult: won ? 'win' : 'loss',
-          tileValues: updatedTileValues,
           drawPileExhaustionCount: exhaustionCount,
           isGameOver: true,
           gameOverReason: exhaustionReason,
         };
       }
-      drawPile = reshuffleDeck(discardPile, updatedTileValues);
+      drawPile = reshuffleDeck(discardPile, tileValues);
       discardPile = [];
     }
 
-    drawPile = updateTilesWithCurrentValues(drawPile, updatedTileValues);
-    const { hand, remainingPile } = drawHand(drawPile, HAND_SIZE);
+    drawPile = updateTilesWithCurrentValues(drawPile, tileValues);
+    const { hand: nextHand, remainingPile } = drawHand(drawPile, HAND_SIZE);
+
+    // --- 2. Resolve bet: compare nextHand vs currentHand ---
+    const won = resolveBet(state.currentHand, nextHand, direction);
+    const scoreChange = won ? nextHand.totalValue : -nextHand.totalValue;
+    const newScore = state.score + scoreChange;
+
+    // --- 3. Update non-number tile values based on win/loss ---
+    const updatedTileValues = updateTileValuesAfterBet(
+      tileValues,
+      nextHand,
+      won
+    );
+
+    // --- 4. Check game over from tile values ---
+    const tileValueReason = checkGameOverFromTileValues(updatedTileValues);
+    if (tileValueReason) {
+      return {
+        ...state,
+        drawPile: remainingPile,
+        discardPile,
+        previousHand: state.currentHand,
+        currentHand: nextHand,
+        score: newScore,
+        lastScoreDelta: scoreChange,
+        lastBetResult: won ? 'win' : 'loss',
+        tileValues: updatedTileValues,
+        drawPileExhaustionCount: exhaustionCount,
+        isGameOver: true,
+        gameOverReason: tileValueReason,
+        roundNumber: state.roundNumber + 1,
+      };
+    }
 
     return {
       ...state,
       drawPile: remainingPile,
       discardPile,
       previousHand: state.currentHand,
-      currentHand: hand,
+      currentHand: nextHand,
       score: newScore,
       lastScoreDelta: scoreChange,
       lastBetResult: won ? 'win' : 'loss',

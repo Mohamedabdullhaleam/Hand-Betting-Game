@@ -28,12 +28,14 @@ export function updateTileValuesAfterBet(
   won: boolean
 ): Record<string, number> {
   const updated = { ...tileValues };
+  const alreadyUpdated = new Set<string>();
 
   for (const tile of hand.tiles) {
     if (tile.type !== TileType.NUMBER) {
       const key = getNonNumberTileKey(tile);
-      if (key && updated[key] !== undefined) {
+      if (key && updated[key] !== undefined && !alreadyUpdated.has(key)) {
         updated[key] += won ? 1 : -1;
+        alreadyUpdated.add(key);
       }
     }
   }
