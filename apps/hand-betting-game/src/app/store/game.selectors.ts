@@ -62,3 +62,8 @@ export const selectLastScoreDelta = createSelector(
   selectGameState,
   (state) => state.lastScoreDelta
 );
+
+export const selectBetCount = createSelector(
+  selectGameState,
+  (state) => state.betCount
+);
