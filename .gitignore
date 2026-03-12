@@ -15,7 +15,11 @@ node_modules
 # AI / editor tooling (local, do not share)
 .cursor
 .claude
+.codex
+.gemini
+.opencode
 .cursorrules
+CLAUDE.md
 .classpath
 .c9/
 *.launch
@@ -50,7 +54,10 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
-.github/instructions/nx.instructions.md
+.github/instructions/
+.github/agents/
+.github/prompts/
+.github/skills/
 
 .angular
 
